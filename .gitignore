@@ -3,13 +3,16 @@ node_modules/
 .next/
 dist/
 out/
+.vercel/
+
+# ========== Build Output ==========
+build/
+.cache/
+.nyc_output/
 
 # ========== Env Files ==========
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
 # ========== Logs & Debug ==========
 npm-debug.log*
@@ -17,16 +20,43 @@ yarn-debug.log*
 pnpm-debug.log*
 *.log
 
-# ========== IDEs (WebStorm/JetBrains) ==========
+# ========== IDEs (WebStorm/JetBrains, VSCode) ==========
 .idea/
+.vscode/
 *.iml
 shelf/
 workspace.xml
 vcs.xml
 
-# ========== OS Files ==========
+# ========== OS-Specific Files ==========
 .DS_Store
 Thumbs.db
+Icon?
 
-# ========== Optional ==========
+# ========== Test Coverage / Results ==========
 coverage/
+test-results/
+jest-html-reporters-*.html
+
+# ========== Typescript ==========
+*.tsbuildinfo
+
+# ========== Misc ==========
+*.local
+*.swp
+*.swo
+
+# ========== Optional - Lint Cache ==========
+.eslintcache
+
+# ========== Optional - Storybook ==========
+.storybook-out/
+storybook-static/
+
+# ========== Optional - Docker ==========
+docker-compose.override.yml
+Dockerfile.local
+.docker/
+
+# ========== Optional - TurboRepo ==========
+turbo/

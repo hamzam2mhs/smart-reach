@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { HiSparkles } from 'react-icons/hi2'
 
 interface AIAssistantModalProps {
@@ -12,6 +12,11 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
     const [prompt, setPrompt] = useState('')
     const [generatedEmail, setGeneratedEmail] = useState('')
     const [loading, setLoading] = useState(false)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     const handleGenerate = async () => {
         setLoading(true)
@@ -33,7 +38,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({ isOpen, onCl
         }
     }
 
-    if (!isOpen) return null
+    if (!mounted || !isOpen) return null
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">

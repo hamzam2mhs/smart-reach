@@ -60,3 +60,5 @@ Dockerfile.local
 
 # ========== Optional - TurboRepo ==========
 turbo/
+
+/src/generated/prisma

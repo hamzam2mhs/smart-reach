@@ -49,31 +49,56 @@ enum ReminderState {
   SNOOZED
 }
 
-// ---------- Models ----------
-model Lead {
-  id                String        @id @default(cuid())
-  name              String
-  email             String?       @unique
-  type              LeadType
-  status            LeadStatus    @default(ACTIVE)
-  phone             String?
-  company           String?
-  tags              String[]      // simple label system
-  query             String?       // for NEW leads: interest / query
-  lastService       String?       // for RETURNING leads
-  lastServiceDate   DateTime?
-  nextSuggestedAt   DateTime?
-  notes             String?
+enum UserRole {
+  ADMIN
+  MEMBER
+}
 
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+// ---------- Models ----------
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      UserRole @default(MEMBER)
+
+  leads     Lead[]
+  drafts    EmailDraft[]  @relation("DraftAuthor")
+  emails    EmailLog[]    @relation("EmailSender")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id              String      @id @default(cuid())
+
+  // Ownership (multi-user)
+  ownerId         String
+  owner           User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  name            String
+  email           String?
+  type            LeadType
+  status          LeadStatus  @default(ACTIVE)
+  phone           String?
+  company         String?
+  tags            String[]    // simple label system
+  query           String?     // for NEW leads: interest / query
+  lastService     String?     // for RETURNING leads
+  lastServiceDate DateTime?
+  nextSuggestedAt DateTime?
+  notes           String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   // Relations
-  drafts            EmailDraft[]
-  emails            EmailLog[]
-  interactions      Interaction[]
-  reminders         Reminder[]
+  drafts          EmailDraft[]
+  emails          EmailLog[]
+  interactions    Interaction[]
+  reminders       Reminder[]
 
+  @@unique([ownerId, email])
   @@index([status, nextSuggestedAt])
   @@index([email])
 }
@@ -85,12 +110,15 @@ model EmailDraft {
 
   subject     String
   body        String
-  model       String?     // e.g., "gpt-4o-mini"
+  model       String?
   prompt      String?
-  tokensUsed  Int?        // optional usage tracking
+  tokensUsed  Int?
   status      DraftStatus @default(DRAFT)
 
-  createdBy   String?     // later: user id / email
+  // Optional author link
+  createdById String?
+  createdBy   User?       @relation("DraftAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+
   createdAt   DateTime    @default(now())
 }
 
@@ -101,12 +129,16 @@ model EmailLog {
 
   subject     String
   body        String
-  provider    String?     // e.g., "gmail", "resend"
-  providerId  String?     // message id
+  provider    String?
+  providerId  String?
   status      EmailStatus @default(QUEUED)
-  meta        Json?       // delivery webhooks, headers, etc.
+  meta        Json?
 
-  sentAt      DateTime?   // when actually sent
+  // Optional sender link (per-user sending later)
+  senderId    String?
+  sender      User?       @relation("EmailSender", fields: [senderId], references: [id], onDelete: SetNull)
+
+  sentAt      DateTime?
   createdAt   DateTime    @default(now())
 
   @@index([status, sentAt])

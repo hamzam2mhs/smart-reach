@@ -1,23 +1,14 @@
-import { prisma } from '@/lib/db'
 
-// create a lead
-await prisma.lead.create({
-    data: {
-        name: 'Jane Doe',
-        email: 'jane@example.com',
-        type: 'NEW',
-        query: 'Website redesign',
-        tags: ['web', 'design'],
-    },
-})
+import { PrismaClient } from "@prisma/client";
 
-// add an AI draft for that lead
-await prisma.emailDraft.create({
-    data: {
-        leadId: '<lead-id>',
-        subject: 'Website Redesign — Quick Plan',
-        body: 'Hi Jane, ...',
-        model: 'gpt-4o-mini',
-        prompt: 'Warm intro for a new lead interested in redesign',
-    },
-})
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
+
+export const prisma =
+    globalForPrisma.prisma ??
+    new PrismaClient({
+        log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    });
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+
+export default prisma;
